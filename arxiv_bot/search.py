@@ -1,9 +1,7 @@
-import xml.etree.ElementTree as ET
-from urllib import request
+import feedparser
 
 
 def query():
     url = "http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=5"
-    data = request.urlopen(url)
-    root = ET.fromstring(data.read())
-    return root
+    data = feedparser.parse(url)
+    return data

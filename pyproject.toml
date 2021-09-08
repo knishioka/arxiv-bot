@@ -11,4 +11,4 @@ exclude = '''
 include_trailing_comma = true
 line_length = 120
 multi_line_output = 3
-known_third_party =[]
+known_third_party =["feedparser"]
