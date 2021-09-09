@@ -4,7 +4,7 @@ import feedparser
 from .article import Article
 
 
-def query(category="cs.AI", max_results=10, sort_by="lastUpdatedDate", sort_order="descending"):
+def query(category="cs.AI", max_results=100, sort_by="lastUpdatedDate", sort_order="descending"):
     """Run query to get articles.
 
     Args:
@@ -28,4 +28,4 @@ def query(category="cs.AI", max_results=10, sort_by="lastUpdatedDate", sort_orde
 if __name__ == "__main__":
     articles = query()
     for article in articles:
-        print(article.title, article.published, article.updated)
+        print(article.title, article.journal_ref, article.published, article.updated)

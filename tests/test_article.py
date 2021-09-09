@@ -9,3 +9,4 @@ def test_parse_article(article_dict):
     assert article.link == "http://arxiv.org/abs/cs/000000v1"
     assert article.published == "2021-01-01T00:00:00Z"
     assert article.updated == "2021-02-01T00:00:00Z"
+    assert article.journal_ref == "Journal Ref"

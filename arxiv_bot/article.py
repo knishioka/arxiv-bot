@@ -12,3 +12,4 @@ class Article:
         self.link = article_dict["link"]
         self.published = article_dict["published"]
         self.updated = article_dict["updated"]
+        self.journal_ref = article_dict.get("arxiv_journal_ref")
