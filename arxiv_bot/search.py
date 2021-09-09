@@ -16,9 +16,10 @@ def query(sort_by="lastUpdatedDate", sort_order="descending"):
 
     """
     url = (
-        "http://export.arxiv.org/api/query?search_query=cat:cs.AI&start=0&max_results=5"
-        f"&sortBY={sort_by}&sortOrder={sort_order}"
+        "https://export.arxiv.org/api/query?search_query=cat:cs.AI&max_results=10"
+        f"&sortBy={sort_by}&sortOrder={sort_order}"
     )
+    print(url)
     data = feedparser.parse(url)
     return [Article(article_dict) for article_dict in data["entries"]]
 
@@ -26,4 +27,4 @@ def query(sort_by="lastUpdatedDate", sort_order="descending"):
 if __name__ == "__main__":
     articles = query()
     for article in articles:
-        print(article.title, article.published)
+        print(article.title, article.published, article.updated)
