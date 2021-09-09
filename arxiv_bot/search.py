@@ -4,10 +4,12 @@ import feedparser
 from .article import Article
 
 
-def query(sort_by="lastUpdatedDate", sort_order="descending"):
+def query(category="cs.AI", max_results=10, sort_by="lastUpdatedDate", sort_order="descending"):
     """Run query to get articles.
 
     Args:
+        category (str): you can find category taxonomy in https://arxiv.org/category_taxonomy.
+        max_results (int): the maximum number of results (<= 30,000).
         sort_by (str): either "lastUpdatedDate" or "submittedDate".
         sort_order (str): either "ascending" or "descending".
 
@@ -16,10 +18,9 @@ def query(sort_by="lastUpdatedDate", sort_order="descending"):
 
     """
     url = (
-        "https://export.arxiv.org/api/query?search_query=cat:cs.AI&max_results=10"
+        f"https://export.arxiv.org/api/query?search_query=cat:{category}&max_results={max_results}"
         f"&sortBy={sort_by}&sortOrder={sort_order}"
     )
-    print(url)
     data = feedparser.parse(url)
     return [Article(article_dict) for article_dict in data["entries"]]
 
