@@ -4,7 +4,7 @@
 
 ```python
 from arxiv_bot.arxiv_scraper import ArxivScraper
-results = ArxivScraper().search(start_date='2012-02', end_date='2012-04', category_id='cs.AI')
+results = ArxivScraper().search(start_date='2020-01-01', end_date='2021-02-01', category_id='cs.AI')
 ```
 
 
