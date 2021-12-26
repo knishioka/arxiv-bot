@@ -1,6 +1,7 @@
 import datetime
 
 from arxiv_bot.arxiv_scraper import ArxivScraper
+from arxiv_bot.translator import translate
 
 
 def main():
@@ -12,6 +13,7 @@ def main():
     for article in articles:
         print(article["itemTitle"])
         print(", ".join(article["itemAuthors"]))
+        print(translate(article["itemSummary"]))
         print(f'https://arxiv.org/abs/{article["id"]}')
 
 
