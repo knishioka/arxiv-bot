@@ -1,5 +1,16 @@
 # arxiv-bot
 
+## Setup
+
+```bash
+cp .env.sample .env
+vim .env
+```
+
+environment variables are following.
+
+- DEEPL_API_KEY: API key for deepl. You can get the key [here](https://www.deepl.com/pro-account/summary).
+
 ## Search By Date Range and Search Query
 
 ```python
