@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup
 
 logging.basicConfig(
-    format="[%(asctime)s > %(module)s:%(lineno)d %(levelname)s] =>  %(message)s",
+    format="[%(asctime)s > %(module)s:%(lineno)d %(levelname)s]\t%(message)s",
     level=logging.INFO,
     datefmt="%m/%d/%Y %I:%M:%S %p",
 )
