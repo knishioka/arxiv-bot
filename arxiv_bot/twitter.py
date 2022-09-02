@@ -9,7 +9,11 @@ ACCESS_TOKEN_SECRET = os.environ["TWITTER_ACCESS_TOKEN_SECRET"]
 
 
 def init_client():
-    """Initialize twitter client."""
+    """Initialize twitter client.
+
+    Returns:
+        tweepy.client.Client
+    """
     return tweepy.Client(
         consumer_key=CONSUMER_KEY,
         consumer_secret=CONSUMER_SECRET,
@@ -18,7 +22,14 @@ def init_client():
     )
 
 
-def tweet(text):
-    """Post tweet on Twitter."""
+def create_tweet(text):
+    """Post Tweet on Twitter.
+
+    Args:
+        text (str): tweet to post.
+
+    Returns:
+        Response
+    """
     client = init_client()
     return client.create_tweet(text="hello world")
