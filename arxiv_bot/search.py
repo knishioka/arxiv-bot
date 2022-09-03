@@ -22,7 +22,20 @@ def query(category="cs.AI", max_results=100, sort_by="lastUpdatedDate", sort_ord
         f"&sortBy={sort_by}&sortOrder={sort_order}"
     )
     data = feedparser.parse(url)
-    return [Article(article_dict) for article_dict in data["entries"]]
+    return [Article(add_primary_category(article_dict)) for article_dict in data["entries"]]
+
+
+def add_primary_category(article_dict):
+    """Extract primary category from dict.
+
+    Args:
+        article_dict (str): article dict.
+
+    Returns:
+        dict
+    """
+    article_dict["primary_category"] = article_dict["arxiv_primary_category"]["term"]
+    return article_dict
 
 
 if __name__ == "__main__":

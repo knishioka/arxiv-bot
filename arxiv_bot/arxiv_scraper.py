@@ -6,6 +6,8 @@ from urllib.parse import parse_qsl, urlencode, urlsplit
 import requests
 from bs4 import BeautifulSoup
 
+from arxiv_bot.article import Article
+
 logging.basicConfig(
     format="[%(asctime)s > %(module)s:%(lineno)d %(levelname)s]\t%(message)s",
     level=logging.INFO,
@@ -119,22 +121,22 @@ class ArxivScraper(object):
             raise ArxivException(error)
         return rsp
 
-    def parse_page_info(self, responseObject: object) -> dict:
+    def parse_page_info(self, response_object: object) -> dict:
         """Get Page info."""
-        soup = BeautifulSoup(responseObject.text, "html.parser")
-        url_query_dict = self.get_url_query_dict(responseObject.url)
-        totalResults = soup.find("h1", {"class": "title is-clearfix"}).text.strip()
-        startIndex = int(url_query_dict["start"])
-        if "your query returned no results" in totalResults.lower():
-            totalPages = 1
+        soup = BeautifulSoup(response_object.text, "html.parser")
+        url_query_dict = self.get_url_query_dict(response_object.url)
+        total_results = soup.find("h1", {"class": "title is-clearfix"}).text.strip()
+        start_index = int(url_query_dict["start"])
+        if "your query returned no results" in total_results.lower():
+            total_pages = 1
         else:
-            totalPages = self.get_total_pages(self.str_to_int(totalResults.split()[-2]), url_query_dict["size"])
+            total_pages = self.get_total_pages(self.str_to_int(total_results.split()[-2]), url_query_dict["size"])
 
         return dict(
-            totalPages=totalPages,
-            totalResults=totalResults,
-            startIndex=startIndex,
-            responseObject=responseObject,
+            total_pages=total_pages,
+            total_results=total_results,
+            start_index=start_index,
+            response_object=response_object,
         )
 
     def parse_items_by_url(self, url: str) -> list:
@@ -145,50 +147,51 @@ class ArxivScraper(object):
         """Parse items."""
         soup = BeautifulSoup(rsp.text, "html.parser")
         url_query_dict = self.get_url_query_dict(rsp.url)
-        itemElems = soup.findAll("li", {"class": "arxiv-result"})
+        item_elems = soup.findAll("li", {"class": "arxiv-result"})
         items = []
-        for itemElemIndex, itemElem in enumerate(itemElems, 1):
-            itemId = (
-                itemElem.select("p a")[-1].get("onclick").strip().split("document.getElementById('")[1].split("-")[0]
-            )
-            itemTitle = itemElem.find(
-                "p", attrs={"class": lambda e: e.startswith("title") if e else False}
-            ).text.strip()
-            itemSummary = (
-                itemElem.find("span", attrs={"class": lambda e: e.startswith("abstract-full") if e else False})
+        for _, item_elem in enumerate(item_elems, 1):
+            id = item_elem.select("p a")[-1].get("onclick").strip().split("document.getElementById('")[1].split("-")[0]
+            link = item_elem.select("p a")[0]["href"]
+            title = item_elem.find("p", attrs={"class": lambda e: e.startswith("title") if e else False}).text.strip()
+            summary = (
+                item_elem.find("span", attrs={"class": lambda e: e.startswith("abstract-full") if e else False})
                 .text.strip()
                 .split("\n        \u25b3")[0]
             )
-            itemAuthors = [
+            authors = [
                 a.text
-                for a in itemElem.find("p", attrs={"class": lambda e: e.startswith("authors") if e else False}).findAll(
-                    "a"
-                )
+                for a in item_elem.find(
+                    "p", attrs={"class": lambda e: e.startswith("authors") if e else False}
+                ).findAll("a")
             ]
-            itemCategories = [
+            categories = [
                 c.text
-                for c in itemElem.find(
+                for c in item_elem.find(
                     "div", attrs={"class": lambda e: e.startswith("tags is-inline-block") if e else False}
                 ).findAll("span")
             ]
-            itemUpdated = datetime.strptime(
-                itemElem.find("p", {"class": "is-size-7"}).text.strip().replace("  ", "").split("\n")[0].split(";")[0],
+            updated = datetime.strptime(
+                item_elem.find("p", {"class": "is-size-7"}).text.strip().replace("  ", "").split("\n")[0].split(";")[0],
                 "Submitted %d %B, %Y",
             )
-            itemPublished = datetime.strptime(
-                itemElem.find("p", {"class": "is-size-7"}).text.strip().replace("  ", "").split("\n")[1],
+            published = datetime.strptime(
+                item_elem.find("p", {"class": "is-size-7"}).text.strip().replace("  ", "").split("\n")[1],
                 "originally announced %B %Y.",
             )
             items.append(
-                dict(
-                    id=itemId,
-                    itemUpdated=itemUpdated.strftime("%d %B %Y"),
-                    itemPublished=itemPublished.strftime("%B %Y"),
-                    itemTitle=itemTitle,
-                    itemSummary=itemSummary,
-                    itemAuthors=itemAuthors,
-                    itemPrimaryCategory=url_query_dict.get("terms-0-term"),
-                    itemCategories=itemCategories,
+                Article(
+                    dict(
+                        id=id,
+                        link=link,
+                        updated=updated.strftime("%d %B %Y"),
+                        published=published.strftime("%B %Y"),
+                        title=title,
+                        summary=summary,
+                        author=authors[0],
+                        authors=authors,
+                        primary_category=url_query_dict.get("terms-0-term"),
+                        categories=categories,
+                    )
                 )
             )
         return items
@@ -210,10 +213,10 @@ class ArxivScraper(object):
             current_page_number = self.current_page_number(url)
             rsp = self.get_response(url)
             page_info = self.parse_page_info(rsp)
-            do_scraping = current_page_number != page_info["totalPages"]
+            do_scraping = current_page_number != page_info["total_pages"]
             start += size
             logger.info(
-                f"\t{prefix} {page_info['totalResults']} | Page {current_page_number}/{page_info['totalPages']}"
+                f"\t{prefix} {page_info['total_results']} | Page {current_page_number}/{page_info['total_pages']}"
             )
             data.extend(self.parse_items(rsp))
         logger.info(f"Completed Search By: {prefix} Extracted {len(data)} results")
